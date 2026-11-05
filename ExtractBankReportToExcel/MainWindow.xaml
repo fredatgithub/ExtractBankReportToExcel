@@ -47,7 +47,9 @@
                   SelectionMode="Single"
                   SelectionUnit="FullRow"
                   GridLinesVisibility="Horizontal"
-                  HeadersVisibility="Column">
+                  HeadersVisibility="Column"
+                  AlternationCount="2"
+                  AlternatingRowBackground="LightBlue">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Date opération"
                                     Binding="{Binding OperationDate, StringFormat={}{0:dd/MM/yyyy}}"
