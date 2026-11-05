@@ -4,7 +4,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
-using UglyToad.PdfPig.Core;
 
 namespace ExtractBankReportToExcel;
 
@@ -16,8 +15,7 @@ internal static partial class PdfReportReader
   {
     using var document = PdfDocument.Open(pdfPath);
     var operations = new List<BankOperation>();
-    var (monthlyPaymentAmount, outstandingBalance, installmentMonthlyPaymentAmount) =
-      ReadStatementAmounts(document);
+    var (monthlyPaymentAmount, outstandingBalance, installmentMonthlyPaymentAmount) = ReadStatementAmounts(document);
 
     foreach (var page in document.GetPages())
     {
@@ -58,10 +56,7 @@ internal static partial class PdfReportReader
     return operations;
   }
 
-  private static (
-    decimal? MonthlyPaymentAmount,
-    decimal? OutstandingBalance,
-    decimal? InstallmentMonthlyPaymentAmount) ReadStatementAmounts(PdfDocument document)
+  private static (decimal? MonthlyPaymentAmount, decimal? OutstandingBalance, decimal? InstallmentMonthlyPaymentAmount) ReadStatementAmounts(PdfDocument document)
   {
     decimal? monthlyPaymentAmount = null;
     decimal? outstandingBalance = null;
@@ -87,8 +82,7 @@ internal static partial class PdfReportReader
           monthlyPaymentAmount = paymentAmount;
         }
 
-        if (!IsInstallmentCreditSection(lineText)
-          || (outstandingBalance is not null && installmentMonthlyPaymentAmount is not null))
+        if (!IsInstallmentCreditSection(lineText) || (outstandingBalance is not null && installmentMonthlyPaymentAmount is not null))
         {
           continue;
         }
@@ -158,8 +152,7 @@ internal static partial class PdfReportReader
 
   private static bool TryReadLabeledAmount(IEnumerable<Word> words, out decimal amount)
   {
-    var amountText = string.Concat(
-      words
+    var amountText = string.Concat(words
         .Where(word => word.BoundingBox.BottomLeft.X >= 500)
         .OrderBy(word => word.BoundingBox.BottomLeft.X)
         .Select(word => word.Text)

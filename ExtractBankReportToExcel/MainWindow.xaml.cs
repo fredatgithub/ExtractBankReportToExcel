@@ -53,11 +53,7 @@ public partial class MainWindow : Window
 
   private static void ShowDirectoryError(string message)
   {
-    MessageBox.Show(
-      $"Impossible de créer le dossier PdfFiles : {message}",
-      "Erreur de création du dossier",
-      MessageBoxButton.OK,
-      MessageBoxImage.Error);
+    MessageBox.Show($"Impossible de créer le dossier PdfFiles : {message}", "Erreur de création du dossier", MessageBoxButton.OK, MessageBoxImage.Error);
   }
 
   private async void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -95,11 +91,7 @@ public partial class MainWindow : Window
       {
         var warningMessage = string.Join(Environment.NewLine, result.Warnings);
         StatusText.Text += $" {result.Warnings.Count} avertissement(s).";
-        MessageBox.Show(
-          warningMessage,
-          "Certains relevés nécessitent une vérification",
-          MessageBoxButton.OK,
-          MessageBoxImage.Warning);
+        MessageBox.Show(warningMessage, "Certains relevés nécessitent une vérification", MessageBoxButton.OK, MessageBoxImage.Warning);
       }
     }
     catch (IOException exception)
@@ -142,8 +134,7 @@ public partial class MainWindow : Window
           warnings.Add($"{Path.GetFileName(pdfFile)} : montant restant dû des opérations en plusieurs fois introuvable.");
         }
 
-        if (fileOperations[0].InstallmentMonthlyPaymentAmount is null
-          || fileOperations[0].InstallmentMonthlyPaymentAmount <= 0)
+        if (fileOperations[0].InstallmentMonthlyPaymentAmount is null || fileOperations[0].InstallmentMonthlyPaymentAmount <= 0)
         {
           warnings.Add($"{Path.GetFileName(pdfFile)} : mensualité des opérations en plusieurs fois introuvable ou invalide ; durée restante non calculée.");
         }
@@ -221,19 +212,11 @@ public partial class MainWindow : Window
   private void ShowLoadError(string message)
   {
     StatusText.Text = "Le chargement des PDF a échoué.";
-    MessageBox.Show(
-      message,
-      "Erreur de lecture",
-      MessageBoxButton.OK,
-      MessageBoxImage.Error);
+    MessageBox.Show(message, "Erreur de lecture", MessageBoxButton.OK, MessageBoxImage.Error);
   }
 
-  private void ShowExportError(string message)
+  private static void ShowExportError(string message)
   {
-    MessageBox.Show(
-      message,
-      "Erreur d’export",
-      MessageBoxButton.OK,
-      MessageBoxImage.Error);
+    MessageBox.Show(message, "Erreur d’export", MessageBoxButton.OK, MessageBoxImage.Error);
   }
 }
