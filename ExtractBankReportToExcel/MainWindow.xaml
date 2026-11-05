@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExtractBankReportToExcel"
         mc:Ignorable="d"
-        Title="Extract bank reports transactions" Height="450" Width="800">
+        Title="Extract bank reports transactions to Excel" Height="450" Width="800">
     <Grid>
 
     </Grid>
