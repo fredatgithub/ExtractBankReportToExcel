@@ -51,22 +51,22 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Date opération"
                                     Binding="{Binding OperationDate, StringFormat={}{0:dd/MM/yyyy}}"
-                                    Width="130" />
+                                    Width="SizeToCells" />
                 <DataGridTextColumn Header="Date valeur"
                                     Binding="{Binding ValueDate, StringFormat={}{0:dd/MM/yyyy}}"
-                                    Width="130" />
+                                    Width="SizeToCells" />
                 <DataGridTextColumn Header="Libellé / opération"
                                     Binding="{Binding Description}"
-                                    Width="*" />
+                                    Width="SizeToCells" />
                 <DataGridTextColumn Header="Débit"
                                     Binding="{Binding Debit, StringFormat={}{0:N2}}"
-                                    Width="120" />
+                                    Width="SizeToCells" />
                 <DataGridTextColumn Header="Crédit"
                                     Binding="{Binding Credit, StringFormat={}{0:N2}}"
-                                    Width="120" />
+                                    Width="SizeToCells" />
                 <DataGridTextColumn Header="Fichier PDF"
                                     Binding="{Binding SourceFile}"
-                                    Width="220" />
+                                    Width="SizeToCells" />
             </DataGrid.Columns>
         </DataGrid>
 
