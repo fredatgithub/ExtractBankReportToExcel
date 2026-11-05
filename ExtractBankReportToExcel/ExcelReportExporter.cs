@@ -1,0 +1,57 @@
+using ClosedXML.Excel;
+
+namespace ExtractBankReportToExcel;
+
+internal static class ExcelReportExporter
+{
+  internal static void Export(string filePath, IReadOnlyList<BankOperation> operations)
+  {
+    using var workbook = new XLWorkbook();
+    var worksheet = workbook.Worksheets.Add("Opérations");
+    var headers = new[] { "Date opération", "Date valeur", "Libellé / opération", "Débit", "Crédit", "Fichier PDF" };
+
+    for (var column = 0; column < headers.Length; column++)
+    {
+      worksheet.Cell(1, column + 1).Value = headers[column];
+    }
+
+    for (var index = 0; index < operations.Count; index++)
+    {
+      var operation = operations[index];
+      var row = index + 2;
+      if (operation.OperationDate is DateTime operationDate)
+      {
+        worksheet.Cell(row, 1).Value = operationDate;
+      }
+
+      if (operation.ValueDate is DateTime valueDate)
+      {
+        worksheet.Cell(row, 2).Value = valueDate;
+      }
+
+      worksheet.Cell(row, 3).Value = operation.Description;
+      if (operation.Debit is decimal debit)
+      {
+        worksheet.Cell(row, 4).Value = debit;
+      }
+
+      if (operation.Credit is decimal credit)
+      {
+        worksheet.Cell(row, 5).Value = credit;
+      }
+
+      worksheet.Cell(row, 6).Value = operation.SourceFile;
+    }
+
+    var lastRow = operations.Count + 1;
+    var table = worksheet.Range(1, 1, lastRow, headers.Length).CreateTable("Operations");
+    table.Theme = XLTableTheme.TableStyleMedium2;
+    worksheet.SheetView.FreezeRows(1);
+    worksheet.Column(1).Style.DateFormat.Format = "dd/mm/yyyy";
+    worksheet.Column(2).Style.DateFormat.Format = "dd/mm/yyyy";
+    worksheet.Column(4).Style.NumberFormat.Format = "#,##0.00";
+    worksheet.Column(5).Style.NumberFormat.Format = "#,##0.00";
+    worksheet.Columns().AdjustToContents();
+    workbook.SaveAs(filePath);
+  }
+}
