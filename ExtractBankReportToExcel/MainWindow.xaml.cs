@@ -11,6 +11,11 @@ namespace ExtractBankReportToExcel
     public MainWindow()
     {
       InitializeComponent();
+      CreatePdfFileDirectory();
+    }
+
+    private static void CreatePdfFileDirectory()
+    {
       if (!Directory.Exists("PdfFiles"))
       {
         try
