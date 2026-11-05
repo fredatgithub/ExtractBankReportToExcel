@@ -11,7 +11,8 @@ internal static class ExcelReportExporter
     var headers = new[]
     {
       "Date opération", "Date valeur", "Libellé / opération", "Débit", "Crédit",
-      "Montant prélèvement", "Montant restant dû", "Fichier PDF"
+      "Montant prélèvement", "Montant restant dû", "Fichier PDF",
+      "Nombre de mensualités restant dues", "Nombre d'années restantes"
     };
 
     for (var column = 0; column < headers.Length; column++)
@@ -55,6 +56,15 @@ internal static class ExcelReportExporter
       }
 
       worksheet.Cell(row, 8).Value = operation.SourceFile;
+      if (operation.RemainingInstallmentCount is int remainingInstallments)
+      {
+        worksheet.Cell(row, 9).Value = remainingInstallments;
+      }
+
+      if (operation.RemainingYearsAndMonths is string remainingYearsAndMonths)
+      {
+        worksheet.Cell(row, 10).Value = remainingYearsAndMonths;
+      }
     }
 
     var lastRow = operations.Count + 1;

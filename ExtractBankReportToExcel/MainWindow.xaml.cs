@@ -142,6 +142,12 @@ public partial class MainWindow : Window
           warnings.Add($"{Path.GetFileName(pdfFile)} : montant restant dû des opérations en plusieurs fois introuvable.");
         }
 
+        if (fileOperations[0].InstallmentMonthlyPaymentAmount is null
+          || fileOperations[0].InstallmentMonthlyPaymentAmount <= 0)
+        {
+          warnings.Add($"{Path.GetFileName(pdfFile)} : mensualité des opérations en plusieurs fois introuvable ou invalide ; durée restante non calculée.");
+        }
+
         operations.AddRange(fileOperations);
       }
       catch (IOException exception)

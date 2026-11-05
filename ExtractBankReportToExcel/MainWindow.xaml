@@ -75,6 +75,12 @@
                 <DataGridTextColumn Header="Fichier PDF"
                                     Binding="{Binding SourceFile}"
                                     Width="SizeToCells" />
+                <DataGridTextColumn Header="Nombre de mensualités restant dues"
+                                    Binding="{Binding RemainingInstallmentCount}"
+                                    Width="SizeToCells" />
+                <DataGridTextColumn Header="Nombre d'années restantes"
+                                    Binding="{Binding RemainingYearsAndMonths}"
+                                    Width="SizeToCells" />
             </DataGrid.Columns>
         </DataGrid>
 

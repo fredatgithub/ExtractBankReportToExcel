@@ -16,7 +16,8 @@ internal static partial class PdfReportReader
   {
     using var document = PdfDocument.Open(pdfPath);
     var operations = new List<BankOperation>();
-    var (monthlyPaymentAmount, outstandingBalance) = ReadStatementAmounts(document);
+    var (monthlyPaymentAmount, outstandingBalance, installmentMonthlyPaymentAmount) =
+      ReadStatementAmounts(document);
 
     foreach (var page in document.GetPages())
     {
@@ -45,6 +46,7 @@ internal static partial class PdfReportReader
             Path.GetFileName(pdfPath),
             monthlyPaymentAmount,
             outstandingBalance,
+            installmentMonthlyPaymentAmount,
             out var operation))
           {
             operations.Add(operation);
@@ -56,11 +58,14 @@ internal static partial class PdfReportReader
     return operations;
   }
 
-  private static (decimal? MonthlyPaymentAmount, decimal? OutstandingBalance) ReadStatementAmounts(
-    PdfDocument document)
+  private static (
+    decimal? MonthlyPaymentAmount,
+    decimal? OutstandingBalance,
+    decimal? InstallmentMonthlyPaymentAmount) ReadStatementAmounts(PdfDocument document)
   {
     decimal? monthlyPaymentAmount = null;
     decimal? outstandingBalance = null;
+    decimal? installmentMonthlyPaymentAmount = null;
 
     foreach (var page in document.GetPages())
     {
@@ -82,7 +87,8 @@ internal static partial class PdfReportReader
           monthlyPaymentAmount = paymentAmount;
         }
 
-        if (outstandingBalance is not null || !IsInstallmentCreditSection(lineText))
+        if (!IsInstallmentCreditSection(lineText)
+          || (outstandingBalance is not null && installmentMonthlyPaymentAmount is not null))
         {
           continue;
         }
@@ -95,17 +101,29 @@ internal static partial class PdfReportReader
             break;
           }
 
-          if (IsOutstandingBalanceLabel(sectionLineText)
+          if (outstandingBalance is null
+            && IsOutstandingBalanceLabel(sectionLineText)
             && TryReadLabeledAmount(lines[sectionLineIndex], out var balance))
           {
             outstandingBalance = balance;
+          }
+
+          if (installmentMonthlyPaymentAmount is null
+            && IsInstallmentMonthlyPaymentLabel(sectionLineText)
+            && TryReadLabeledAmount(lines[sectionLineIndex], out var installmentMonthlyPayment))
+          {
+            installmentMonthlyPaymentAmount = installmentMonthlyPayment;
+          }
+
+          if (outstandingBalance is not null && installmentMonthlyPaymentAmount is not null)
+          {
             break;
           }
         }
       }
     }
 
-    return (monthlyPaymentAmount, outstandingBalance);
+    return (monthlyPaymentAmount, outstandingBalance, installmentMonthlyPaymentAmount);
   }
 
   private static bool IsInstallmentCreditSection(string normalizedText)
@@ -126,6 +144,11 @@ internal static partial class PdfReportReader
     return normalizedText.Contains("MONTANT", StringComparison.Ordinal)
       && normalizedText.Contains("RESTANT", StringComparison.Ordinal)
       && normalizedText.Contains("DU", StringComparison.Ordinal);
+  }
+
+  private static bool IsInstallmentMonthlyPaymentLabel(string normalizedText)
+  {
+    return normalizedText.Contains("MA MENSUALITE", StringComparison.Ordinal);
   }
 
   private static string GetNormalizedLineText(IEnumerable<Word> words)
@@ -160,6 +183,7 @@ internal static partial class PdfReportReader
     string sourceFile,
     decimal? monthlyPaymentAmount,
     decimal? outstandingBalance,
+    decimal? installmentMonthlyPaymentAmount,
     out BankOperation operation)
   {
     var words = line.OrderBy(word => word.BoundingBox.BottomLeft.X).ToList();
@@ -201,6 +225,7 @@ internal static partial class PdfReportReader
       Credit = credit,
       MonthlyPaymentAmount = monthlyPaymentAmount,
       OutstandingBalance = outstandingBalance,
+      InstallmentMonthlyPaymentAmount = installmentMonthlyPaymentAmount,
       SourceFile = sourceFile
     };
     return true;
