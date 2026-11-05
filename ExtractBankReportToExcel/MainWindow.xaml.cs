@@ -1,6 +1,7 @@
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using UglyToad.PdfPig.Core;
@@ -18,8 +19,18 @@ public partial class MainWindow : Window
     InitializeComponent();
     DataContext = this;
     CreatePdfFileDirectory();
+    AddVersionTotitle();
     FolderPathText.Text = $"Dossier des PDF : {_pdfFolder}";
     Loaded += async (_, _) => await LoadPdfReportsAsync();
+  }
+
+  private void AddVersionTotitle()
+  {
+    var version = Assembly.GetExecutingAssembly().GetName().Version;
+    if (version != null)
+    {
+      Title += $" V{version}";
+    }
   }
 
   private static void CreatePdfFileDirectory()
