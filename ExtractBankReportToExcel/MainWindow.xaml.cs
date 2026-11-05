@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 
 namespace ExtractBankReportToExcel
 {
@@ -10,6 +11,18 @@ namespace ExtractBankReportToExcel
     public MainWindow()
     {
       InitializeComponent();
+      if (!Directory.Exists("PdfFiles"))
+      {
+        try
+        {
+          Directory.CreateDirectory("PdfFiles");
+        }
+        catch (Exception exception)
+        {
+          MessageBox.Show($"Could not create PdfFiles directory: {exception.Message}", "Can't create directory", MessageBoxButton.OK, MessageBoxImage.Error);
+          throw;
+        }
+      }
     }
   }
 }
