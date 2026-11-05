@@ -9,6 +9,6 @@ Application WPF qui lit les relevés PDF du dossier `PdfFiles` et affiche les op
 3. Utilisez **Actualiser** après avoir ajouté ou remplacé des relevés.
 4. Cliquez sur **Exporter en Excel (.xlsx)** et choisissez où enregistrer le classeur.
 
-Le tableau contient les dates d’opération et de valeur, le libellé, les montants débit/crédit ainsi que le nom du PDF source. Les PDF illisibles ou dont le format ne contient pas une table d’opérations reconnue sont signalés dans un avertissement.
+Le tableau contient les dates d’opération et de valeur, le libellé, les montants débit/crédit, le prochain prélèvement mensuel, le montant restant dû dans la rubrique « Mes opérations en plusieurs fois à crédit » ainsi que le nom du PDF source. Ces deux montants du relevé sont répétés sur chaque opération du même PDF. Les PDF illisibles, les champs de synthèse introuvables ou les relevés dont le format ne contient pas une table d’opérations reconnue sont signalés dans un avertissement.
 
 L’extraction actuelle reconnaît les tables comportant les colonnes date, opération, débit et crédit. Les PDF numérisés sans couche texte ne peuvent pas être lus sans OCR.

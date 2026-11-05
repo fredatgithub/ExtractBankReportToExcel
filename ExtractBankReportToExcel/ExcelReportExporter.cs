@@ -8,7 +8,11 @@ internal static class ExcelReportExporter
   {
     using var workbook = new XLWorkbook();
     var worksheet = workbook.Worksheets.Add("Opérations");
-    var headers = new[] { "Date opération", "Date valeur", "Libellé / opération", "Débit", "Crédit", "Fichier PDF" };
+    var headers = new[]
+    {
+      "Date opération", "Date valeur", "Libellé / opération", "Débit", "Crédit",
+      "Montant prélèvement", "Montant restant dû", "Fichier PDF"
+    };
 
     for (var column = 0; column < headers.Length; column++)
     {
@@ -40,7 +44,17 @@ internal static class ExcelReportExporter
         worksheet.Cell(row, 5).Value = credit;
       }
 
-      worksheet.Cell(row, 6).Value = operation.SourceFile;
+      if (operation.MonthlyPaymentAmount is decimal monthlyPaymentAmount)
+      {
+        worksheet.Cell(row, 6).Value = monthlyPaymentAmount;
+      }
+
+      if (operation.OutstandingBalance is decimal outstandingBalance)
+      {
+        worksheet.Cell(row, 7).Value = outstandingBalance;
+      }
+
+      worksheet.Cell(row, 8).Value = operation.SourceFile;
     }
 
     var lastRow = operations.Count + 1;
@@ -51,6 +65,8 @@ internal static class ExcelReportExporter
     worksheet.Column(2).Style.DateFormat.Format = "dd/mm/yyyy";
     worksheet.Column(4).Style.NumberFormat.Format = "#,##0.00";
     worksheet.Column(5).Style.NumberFormat.Format = "#,##0.00";
+    worksheet.Column(6).Style.NumberFormat.Format = "#,##0.00";
+    worksheet.Column(7).Style.NumberFormat.Format = "#,##0.00";
     worksheet.Columns().AdjustToContents();
     workbook.SaveAs(filePath);
   }

@@ -66,6 +66,12 @@
                 <DataGridTextColumn Header="Crédit"
                                     Binding="{Binding Credit, StringFormat={}{0:N2}}"
                                     Width="SizeToCells" />
+                <DataGridTextColumn Header="Montant prélèvement"
+                                    Binding="{Binding MonthlyPaymentAmount, StringFormat={}{0:N2}}"
+                                    Width="SizeToCells" />
+                <DataGridTextColumn Header="Montant restant dû"
+                                    Binding="{Binding OutstandingBalance, StringFormat={}{0:N2}}"
+                                    Width="SizeToCells" />
                 <DataGridTextColumn Header="Fichier PDF"
                                     Binding="{Binding SourceFile}"
                                     Width="SizeToCells" />

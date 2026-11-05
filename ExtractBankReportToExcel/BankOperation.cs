@@ -12,5 +12,9 @@ public sealed class BankOperation
 
   public decimal? Credit { get; init; }
 
+  public decimal? MonthlyPaymentAmount { get; init; }
+
+  public decimal? OutstandingBalance { get; init; }
+
   public string SourceFile { get; init; } = string.Empty;
 }

@@ -16,6 +16,7 @@ internal static partial class PdfReportReader
   {
     using var document = PdfDocument.Open(pdfPath);
     var operations = new List<BankOperation>();
+    var (monthlyPaymentAmount, outstandingBalance) = ReadStatementAmounts(document);
 
     foreach (var page in document.GetPages())
     {
@@ -39,7 +40,12 @@ internal static partial class PdfReportReader
             break;
           }
 
-          if (TryReadOperation(line, Path.GetFileName(pdfPath), out var operation))
+          if (TryReadOperation(
+            line,
+            Path.GetFileName(pdfPath),
+            monthlyPaymentAmount,
+            outstandingBalance,
+            out var operation))
           {
             operations.Add(operation);
           }
@@ -48,6 +54,96 @@ internal static partial class PdfReportReader
     }
 
     return operations;
+  }
+
+  private static (decimal? MonthlyPaymentAmount, decimal? OutstandingBalance) ReadStatementAmounts(
+    PdfDocument document)
+  {
+    decimal? monthlyPaymentAmount = null;
+    decimal? outstandingBalance = null;
+
+    foreach (var page in document.GetPages())
+    {
+      var lines = page.GetWords()
+        .GroupBy(word => Math.Round(word.BoundingBox.BottomLeft.Y))
+        .OrderByDescending(line => line.Key)
+        .ToList();
+
+      for (var lineIndex = 0; lineIndex < lines.Count; lineIndex++)
+      {
+        var lineText = GetNormalizedLineText(lines[lineIndex]);
+
+        if (monthlyPaymentAmount is null
+          && lineText.Contains("MONTANT", StringComparison.Ordinal)
+          && lineText.Contains("PROCHAIN", StringComparison.Ordinal)
+          && lineText.Contains("PRELEVEMENT", StringComparison.Ordinal)
+          && TryReadLabeledAmount(lines[lineIndex], out var paymentAmount))
+        {
+          monthlyPaymentAmount = paymentAmount;
+        }
+
+        if (outstandingBalance is not null || !IsInstallmentCreditSection(lineText))
+        {
+          continue;
+        }
+
+        for (var sectionLineIndex = lineIndex + 1; sectionLineIndex < lines.Count; sectionLineIndex++)
+        {
+          var sectionLineText = GetNormalizedLineText(lines[sectionLineIndex]);
+          if (IsCreditSection(sectionLineText))
+          {
+            break;
+          }
+
+          if (IsOutstandingBalanceLabel(sectionLineText)
+            && TryReadLabeledAmount(lines[sectionLineIndex], out var balance))
+          {
+            outstandingBalance = balance;
+            break;
+          }
+        }
+      }
+    }
+
+    return (monthlyPaymentAmount, outstandingBalance);
+  }
+
+  private static bool IsInstallmentCreditSection(string normalizedText)
+  {
+    return normalizedText.Contains("MES OPERATIONS", StringComparison.Ordinal)
+      && normalizedText.Contains("EN PLUSIEURS FOIS", StringComparison.Ordinal)
+      && normalizedText.Contains("A CREDIT", StringComparison.Ordinal);
+  }
+
+  private static bool IsCreditSection(string normalizedText)
+  {
+    return normalizedText.Contains("MES OPERATIONS", StringComparison.Ordinal)
+      && normalizedText.Contains("A CREDIT", StringComparison.Ordinal);
+  }
+
+  private static bool IsOutstandingBalanceLabel(string normalizedText)
+  {
+    return normalizedText.Contains("MONTANT", StringComparison.Ordinal)
+      && normalizedText.Contains("RESTANT", StringComparison.Ordinal)
+      && normalizedText.Contains("DU", StringComparison.Ordinal);
+  }
+
+  private static string GetNormalizedLineText(IEnumerable<Word> words)
+  {
+    return string.Join(" ", words.Select(word => Normalize(word.Text)));
+  }
+
+  private static bool TryReadLabeledAmount(IEnumerable<Word> words, out decimal amount)
+  {
+    var amountText = string.Concat(
+      words
+        .Where(word => word.BoundingBox.BottomLeft.X >= 500)
+        .OrderBy(word => word.BoundingBox.BottomLeft.X)
+        .Select(word => word.Text)
+        .Where(token => Regex.IsMatch(token, @"^[\d.,\-−€]+$") && token.Any(char.IsDigit))
+        .Select(token => token.Replace("€", string.Empty, StringComparison.Ordinal)));
+
+    return TryParseAmount(amountText, out amount);
   }
 
   private static bool IsOperationsHeader(IEnumerable<Word> words)
@@ -62,6 +158,8 @@ internal static partial class PdfReportReader
   private static bool TryReadOperation(
     IGrouping<double, Word> line,
     string sourceFile,
+    decimal? monthlyPaymentAmount,
+    decimal? outstandingBalance,
     out BankOperation operation)
   {
     var words = line.OrderBy(word => word.BoundingBox.BottomLeft.X).ToList();
@@ -101,6 +199,8 @@ internal static partial class PdfReportReader
       Description = description,
       Debit = debit,
       Credit = credit,
+      MonthlyPaymentAmount = monthlyPaymentAmount,
+      OutstandingBalance = outstandingBalance,
       SourceFile = sourceFile
     };
     return true;

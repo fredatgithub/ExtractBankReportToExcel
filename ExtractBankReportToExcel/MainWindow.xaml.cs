@@ -132,6 +132,16 @@ public partial class MainWindow : Window
           continue;
         }
 
+        if (fileOperations[0].MonthlyPaymentAmount is null)
+        {
+          warnings.Add($"{Path.GetFileName(pdfFile)} : montant du prochain prélèvement mensuel introuvable.");
+        }
+
+        if (fileOperations[0].OutstandingBalance is null)
+        {
+          warnings.Add($"{Path.GetFileName(pdfFile)} : montant restant dû des opérations en plusieurs fois introuvable.");
+        }
+
         operations.AddRange(fileOperations);
       }
       catch (IOException exception)
